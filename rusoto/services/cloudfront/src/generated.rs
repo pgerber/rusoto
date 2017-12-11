@@ -36,7 +36,8 @@ use xml::EventWriter;
 use xml::reader::XmlEvent;
 use rusoto_core::xmlerror::*;
 use rusoto_core::xmlutil::{Next, Peek, XmlParseError, XmlResponse};
-use rusoto_core::xmlutil::{peek_at_name, characters, end_element, start_element, skip_tree};
+use rusoto_core::xmlutil::{peek_at_name, characters, end_element, find_start_element,
+                           start_element, skip_tree};
 enum DeserializerNext {
     Close,
     Skip,
@@ -7859,8 +7860,7 @@ impl CreateCloudFrontOriginAccessIdentityError {
     pub fn from_body(body: &str) -> CreateCloudFrontOriginAccessIdentityError {
         let reader = EventReader::new(body.as_bytes());
         let mut stack = XmlResponse::new(reader.into_iter().peekable());
-        let _start_document = stack.next();
-        let _response_envelope = stack.next();
+        find_start_element(&mut stack);
         match XmlErrorDeserializer::deserialize("Error", &mut stack) {
             Ok(parsed_error) => {
                 match &parsed_error.code[..] {
@@ -8018,8 +8018,7 @@ impl CreateDistributionError {
     pub fn from_body(body: &str) -> CreateDistributionError {
         let reader = EventReader::new(body.as_bytes());
         let mut stack = XmlResponse::new(reader.into_iter().peekable());
-        let _start_document = stack.next();
-        let _response_envelope = stack.next();
+        find_start_element(&mut stack);
         match XmlErrorDeserializer::deserialize("Error", &mut stack) {
             Ok(parsed_error) => {
                 match &parsed_error.code[..] {
@@ -8265,8 +8264,7 @@ impl CreateDistributionWithTagsError {
     pub fn from_body(body: &str) -> CreateDistributionWithTagsError {
         let reader = EventReader::new(body.as_bytes());
         let mut stack = XmlResponse::new(reader.into_iter().peekable());
-        let _start_document = stack.next();
-        let _response_envelope = stack.next();
+        find_start_element(&mut stack);
         match XmlErrorDeserializer::deserialize("Error", &mut stack) {
             Ok(parsed_error) => {
                 match &parsed_error.code[..] {
@@ -8430,8 +8428,7 @@ impl CreateInvalidationError {
     pub fn from_body(body: &str) -> CreateInvalidationError {
         let reader = EventReader::new(body.as_bytes());
         let mut stack = XmlResponse::new(reader.into_iter().peekable());
-        let _start_document = stack.next();
-        let _response_envelope = stack.next();
+        find_start_element(&mut stack);
         match XmlErrorDeserializer::deserialize("Error", &mut stack) {
             Ok(parsed_error) => {
                 match &parsed_error.code[..] {
@@ -8545,8 +8542,7 @@ impl CreateStreamingDistributionError {
     pub fn from_body(body: &str) -> CreateStreamingDistributionError {
         let reader = EventReader::new(body.as_bytes());
         let mut stack = XmlResponse::new(reader.into_iter().peekable());
-        let _start_document = stack.next();
-        let _response_envelope = stack.next();
+        find_start_element(&mut stack);
         match XmlErrorDeserializer::deserialize("Error", &mut stack) {
             Ok(parsed_error) => {
                 match &parsed_error.code[..] {
@@ -8668,8 +8664,7 @@ impl CreateStreamingDistributionWithTagsError {
     pub fn from_body(body: &str) -> CreateStreamingDistributionWithTagsError {
         let reader = EventReader::new(body.as_bytes());
         let mut stack = XmlResponse::new(reader.into_iter().peekable());
-        let _start_document = stack.next();
-        let _response_envelope = stack.next();
+        find_start_element(&mut stack);
         match XmlErrorDeserializer::deserialize("Error", &mut stack) {
             Ok(parsed_error) => {
                 match &parsed_error.code[..] {
@@ -8777,8 +8772,7 @@ impl DeleteCloudFrontOriginAccessIdentityError {
     pub fn from_body(body: &str) -> DeleteCloudFrontOriginAccessIdentityError {
         let reader = EventReader::new(body.as_bytes());
         let mut stack = XmlResponse::new(reader.into_iter().peekable());
-        let _start_document = stack.next();
-        let _response_envelope = stack.next();
+        find_start_element(&mut stack);
         match XmlErrorDeserializer::deserialize("Error", &mut stack) {
             Ok(parsed_error) => {
                 match &parsed_error.code[..] {
@@ -8866,8 +8860,7 @@ impl DeleteDistributionError {
     pub fn from_body(body: &str) -> DeleteDistributionError {
         let reader = EventReader::new(body.as_bytes());
         let mut stack = XmlResponse::new(reader.into_iter().peekable());
-        let _start_document = stack.next();
-        let _response_envelope = stack.next();
+        find_start_element(&mut stack);
         match XmlErrorDeserializer::deserialize("Error", &mut stack) {
             Ok(parsed_error) => {
                 match &parsed_error.code[..] {
@@ -8957,8 +8950,7 @@ impl DeleteStreamingDistributionError {
     pub fn from_body(body: &str) -> DeleteStreamingDistributionError {
         let reader = EventReader::new(body.as_bytes());
         let mut stack = XmlResponse::new(reader.into_iter().peekable());
-        let _start_document = stack.next();
-        let _response_envelope = stack.next();
+        find_start_element(&mut stack);
         match XmlErrorDeserializer::deserialize("Error", &mut stack) {
             Ok(parsed_error) => {
                 match &parsed_error.code[..] {
@@ -9040,8 +9032,7 @@ impl GetCloudFrontOriginAccessIdentityError {
     pub fn from_body(body: &str) -> GetCloudFrontOriginAccessIdentityError {
         let reader = EventReader::new(body.as_bytes());
         let mut stack = XmlResponse::new(reader.into_iter().peekable());
-        let _start_document = stack.next();
-        let _response_envelope = stack.next();
+        find_start_element(&mut stack);
         match XmlErrorDeserializer::deserialize("Error", &mut stack) {
             Ok(parsed_error) => {
                 match &parsed_error.code[..] {
@@ -9117,8 +9108,7 @@ impl GetCloudFrontOriginAccessIdentityConfigError {
     pub fn from_body(body: &str) -> GetCloudFrontOriginAccessIdentityConfigError {
         let reader = EventReader::new(body.as_bytes());
         let mut stack = XmlResponse::new(reader.into_iter().peekable());
-        let _start_document = stack.next();
-        let _response_envelope = stack.next();
+        find_start_element(&mut stack);
         match XmlErrorDeserializer::deserialize("Error", &mut stack) {
             Ok(parsed_error) => {
                 match &parsed_error.code[..] {
@@ -9194,8 +9184,7 @@ impl GetDistributionError {
     pub fn from_body(body: &str) -> GetDistributionError {
         let reader = EventReader::new(body.as_bytes());
         let mut stack = XmlResponse::new(reader.into_iter().peekable());
-        let _start_document = stack.next();
-        let _response_envelope = stack.next();
+        find_start_element(&mut stack);
         match XmlErrorDeserializer::deserialize("Error", &mut stack) {
             Ok(parsed_error) => {
                 match &parsed_error.code[..] {
@@ -9273,8 +9262,7 @@ impl GetDistributionConfigError {
     pub fn from_body(body: &str) -> GetDistributionConfigError {
         let reader = EventReader::new(body.as_bytes());
         let mut stack = XmlResponse::new(reader.into_iter().peekable());
-        let _start_document = stack.next();
-        let _response_envelope = stack.next();
+        find_start_element(&mut stack);
         match XmlErrorDeserializer::deserialize("Error", &mut stack) {
             Ok(parsed_error) => {
                 match &parsed_error.code[..] {
@@ -9354,8 +9342,7 @@ impl GetInvalidationError {
     pub fn from_body(body: &str) -> GetInvalidationError {
         let reader = EventReader::new(body.as_bytes());
         let mut stack = XmlResponse::new(reader.into_iter().peekable());
-        let _start_document = stack.next();
-        let _response_envelope = stack.next();
+        find_start_element(&mut stack);
         match XmlErrorDeserializer::deserialize("Error", &mut stack) {
             Ok(parsed_error) => {
                 match &parsed_error.code[..] {
@@ -9437,8 +9424,7 @@ impl GetStreamingDistributionError {
     pub fn from_body(body: &str) -> GetStreamingDistributionError {
         let reader = EventReader::new(body.as_bytes());
         let mut stack = XmlResponse::new(reader.into_iter().peekable());
-        let _start_document = stack.next();
-        let _response_envelope = stack.next();
+        find_start_element(&mut stack);
         match XmlErrorDeserializer::deserialize("Error", &mut stack) {
             Ok(parsed_error) => {
                 match &parsed_error.code[..] {
@@ -9514,8 +9500,7 @@ impl GetStreamingDistributionConfigError {
     pub fn from_body(body: &str) -> GetStreamingDistributionConfigError {
         let reader = EventReader::new(body.as_bytes());
         let mut stack = XmlResponse::new(reader.into_iter().peekable());
-        let _start_document = stack.next();
-        let _response_envelope = stack.next();
+        find_start_element(&mut stack);
         match XmlErrorDeserializer::deserialize("Error", &mut stack) {
             Ok(parsed_error) => {
                 match &parsed_error.code[..] {
@@ -9589,8 +9574,7 @@ impl ListCloudFrontOriginAccessIdentitiesError {
     pub fn from_body(body: &str) -> ListCloudFrontOriginAccessIdentitiesError {
         let reader = EventReader::new(body.as_bytes());
         let mut stack = XmlResponse::new(reader.into_iter().peekable());
-        let _start_document = stack.next();
-        let _response_envelope = stack.next();
+        find_start_element(&mut stack);
         match XmlErrorDeserializer::deserialize("Error", &mut stack) {
             Ok(parsed_error) => {
                 match &parsed_error.code[..] {
@@ -9662,8 +9646,7 @@ impl ListDistributionsError {
     pub fn from_body(body: &str) -> ListDistributionsError {
         let reader = EventReader::new(body.as_bytes());
         let mut stack = XmlResponse::new(reader.into_iter().peekable());
-        let _start_document = stack.next();
-        let _response_envelope = stack.next();
+        find_start_element(&mut stack);
         match XmlErrorDeserializer::deserialize("Error", &mut stack) {
             Ok(parsed_error) => {
                 match &parsed_error.code[..] {
@@ -9739,8 +9722,7 @@ impl ListDistributionsByWebACLIdError {
     pub fn from_body(body: &str) -> ListDistributionsByWebACLIdError {
         let reader = EventReader::new(body.as_bytes());
         let mut stack = XmlResponse::new(reader.into_iter().peekable());
-        let _start_document = stack.next();
-        let _response_envelope = stack.next();
+        find_start_element(&mut stack);
         match XmlErrorDeserializer::deserialize("Error", &mut stack) {
             Ok(parsed_error) => {
                 match &parsed_error.code[..] {
@@ -9818,8 +9800,7 @@ impl ListInvalidationsError {
     pub fn from_body(body: &str) -> ListInvalidationsError {
         let reader = EventReader::new(body.as_bytes());
         let mut stack = XmlResponse::new(reader.into_iter().peekable());
-        let _start_document = stack.next();
-        let _response_envelope = stack.next();
+        find_start_element(&mut stack);
         match XmlErrorDeserializer::deserialize("Error", &mut stack) {
             Ok(parsed_error) => {
                 match &parsed_error.code[..] {
@@ -9899,8 +9880,7 @@ impl ListStreamingDistributionsError {
     pub fn from_body(body: &str) -> ListStreamingDistributionsError {
         let reader = EventReader::new(body.as_bytes());
         let mut stack = XmlResponse::new(reader.into_iter().peekable());
-        let _start_document = stack.next();
-        let _response_envelope = stack.next();
+        find_start_element(&mut stack);
         match XmlErrorDeserializer::deserialize("Error", &mut stack) {
             Ok(parsed_error) => {
                 match &parsed_error.code[..] {
@@ -9978,8 +9958,7 @@ impl ListTagsForResourceError {
     pub fn from_body(body: &str) -> ListTagsForResourceError {
         let reader = EventReader::new(body.as_bytes());
         let mut stack = XmlResponse::new(reader.into_iter().peekable());
-        let _start_document = stack.next();
-        let _response_envelope = stack.next();
+        find_start_element(&mut stack);
         match XmlErrorDeserializer::deserialize("Error", &mut stack) {
             Ok(parsed_error) => {
                 match &parsed_error.code[..] {
@@ -10069,8 +10048,7 @@ impl TagResourceError {
     pub fn from_body(body: &str) -> TagResourceError {
         let reader = EventReader::new(body.as_bytes());
         let mut stack = XmlResponse::new(reader.into_iter().peekable());
-        let _start_document = stack.next();
-        let _response_envelope = stack.next();
+        find_start_element(&mut stack);
         match XmlErrorDeserializer::deserialize("Error", &mut stack) {
             Ok(parsed_error) => {
                 match &parsed_error.code[..] {
@@ -10160,8 +10138,7 @@ impl UntagResourceError {
     pub fn from_body(body: &str) -> UntagResourceError {
         let reader = EventReader::new(body.as_bytes());
         let mut stack = XmlResponse::new(reader.into_iter().peekable());
-        let _start_document = stack.next();
-        let _response_envelope = stack.next();
+        find_start_element(&mut stack);
         match XmlErrorDeserializer::deserialize("Error", &mut stack) {
             Ok(parsed_error) => {
                 match &parsed_error.code[..] {
@@ -10259,8 +10236,7 @@ impl UpdateCloudFrontOriginAccessIdentityError {
     pub fn from_body(body: &str) -> UpdateCloudFrontOriginAccessIdentityError {
         let reader = EventReader::new(body.as_bytes());
         let mut stack = XmlResponse::new(reader.into_iter().peekable());
-        let _start_document = stack.next();
-        let _response_envelope = stack.next();
+        find_start_element(&mut stack);
         match XmlErrorDeserializer::deserialize("Error", &mut stack) {
             Ok(parsed_error) => {
                 match &parsed_error.code[..] {
@@ -10424,8 +10400,7 @@ impl UpdateDistributionError {
     pub fn from_body(body: &str) -> UpdateDistributionError {
         let reader = EventReader::new(body.as_bytes());
         let mut stack = XmlResponse::new(reader.into_iter().peekable());
-        let _start_document = stack.next();
-        let _response_envelope = stack.next();
+        find_start_element(&mut stack);
         match XmlErrorDeserializer::deserialize("Error", &mut stack) {
             Ok(parsed_error) => {
                 match &parsed_error.code[..] {
@@ -10615,8 +10590,7 @@ impl UpdateStreamingDistributionError {
     pub fn from_body(body: &str) -> UpdateStreamingDistributionError {
         let reader = EventReader::new(body.as_bytes());
         let mut stack = XmlResponse::new(reader.into_iter().peekable());
-        let _start_document = stack.next();
-        let _response_envelope = stack.next();
+        find_start_element(&mut stack);
         match XmlErrorDeserializer::deserialize("Error", &mut stack) {
             Ok(parsed_error) => {
                 match &parsed_error.code[..] {
