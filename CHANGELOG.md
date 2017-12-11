@@ -4,6 +4,7 @@
 (Please put an entry here in each PR)
 
 - Allow setting both, Region name and endpoint, via `Region::Custom`
+- fix handling of error responses from Ceph (S3)
 
 ## [0.30.0] - 2017-12-02
 
