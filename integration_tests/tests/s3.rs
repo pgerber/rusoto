@@ -8,6 +8,7 @@ extern crate log;
 
 use hyper::Client;
 use std::collections::HashMap;
+use std::env;
 use std::fs::File;
 use std::io::{Read, BufReader};
 use time::get_time;
@@ -29,11 +30,16 @@ type TestClient = S3Client<DefaultCredentialsProvider, Client>;
 fn test_all_the_things() {
     let _ = env_logger::init();
 
+    let region = if let Ok(endpoint) = env::var("S3_ENDPOINT") {
+        Region::Custom { name: "us-east-1".to_owned(), endpoint: endpoint.to_owned() }
+    } else {
+        Region::UsEast1
+    };
     let client = S3Client::new(default_tls_client().unwrap(),
                                DefaultCredentialsProvider::new().unwrap(),
-                               Region::UsEast1);
+                               region);
 
-    let test_bucket = format!("rusoto_test_bucket_{}", get_time().sec);
+    let test_bucket = format!("rusoto-test-bucket-{}", get_time().sec);
     let filename = format!("test_file_{}", get_time().sec);
     let utf8_filename = format!("test[über]file@{}", get_time().sec);
     let binary_filename = format!("test_file_b{}", get_time().sec);
@@ -50,6 +56,7 @@ fn test_all_the_things() {
     list_items_in_bucket(&client, &test_bucket);
 
     // do a multipart upload
+    #[cfg(not(feature = "no_minio_incompatible_tests"))]
     test_multipart_upload(&client, &test_bucket, &multipart_filename);
 
     // modify the bucket's CORS properties
@@ -112,6 +119,7 @@ fn test_all_the_things() {
     test_get_object_with_metadata(&client, &test_bucket, &metadata_filename, &metadata);
 
     // list items with paging
+    #[cfg(not(feature = "no_ceph_incompatible_tests"))]
     list_items_in_bucket_paged(&client, &test_bucket);
 
     test_delete_object(&client, &test_bucket, &metadata_filename);
