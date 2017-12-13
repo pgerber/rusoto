@@ -60,6 +60,7 @@ fn test_all_the_things() {
     test_multipart_upload(&client, &test_bucket, &multipart_filename);
 
     // modify the bucket's CORS properties
+    #[cfg(not(feature = "no_minio_unimplemented_tests"))]
     test_put_bucket_cors(&client, &test_bucket);
 
     // PUT an object (no_credentials is an arbitrary choice)
@@ -114,8 +115,10 @@ fn test_all_the_things() {
                                   &metadata_filename,
                                   &"tests/sample-data/no_credentials",
                                   &metadata);
-    
+
+    #[cfg(not(feature = "no_minio_incompatible_tests"))]
     test_head_object_with_metadata(&client, &test_bucket, &metadata_filename, &metadata);
+    #[cfg(not(feature = "no_minio_incompatible_tests"))]
     test_get_object_with_metadata(&client, &test_bucket, &metadata_filename, &metadata);
 
     // list items with paging

@@ -54,6 +54,26 @@ script:
               -- cargo test --features s3,no_ceph_incompatible_tests
         )
       fi
+  - |
+      echo "Running Minio integration tests"
+      if [[ "$TRAVIS_OS_NAME" == "linux" && "$TRAVIS_RUST_VERSION" == "stable" ]]; then
+        (
+          export AWS_ACCESS_KEY_ID=ANTN35UAENTS5UIAEATD
+          export AWS_SECRET_ACCESS_KEY=TtnuieannGt2rGuie2t8Tt7urarg5nauedRndrur
+          export S3_ENDPOINT='http://localhost:9000'
+          cd integration_tests && \
+          ./docker_test_run.py \
+              --docker-image="minio/minio" \
+              --docker-image="minio/minio:edge" \
+              --port=9000 \
+              --run-opt=--env=MINIO_ACCESS_KEY=$AWS_ACCESS_KEY_ID \
+              --run-opt=--env=MINIO_SECRET_KEY=$AWS_SECRET_ACCESS_KEY \
+              --run-opt=--env=MINIO_DOMAIN=localhost \
+              --run-arg=server \
+              --run-arg=/home/shared \
+              -- cargo test --features s3,no_minio_incompatible_tests,no_minio_unimplemented_tests
+        )
+      fi
 after_success:
   # upload the documentation from the build if it's from Rust stable, Linux and not a pull request:
   - |
