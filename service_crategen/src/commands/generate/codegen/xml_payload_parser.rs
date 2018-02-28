@@ -152,7 +152,9 @@ fn xml_body_parser(output_shape: &str,
                 );
                 let mut stack = XmlResponse::new(reader.into_iter().peekable());
                 let _start_document = stack.next();
-                let actual_tag_name = try!(peek_at_name(&mut stack));
+                let actual_tag_name = peek_at_name(&mut stack)?.ok_or_else(|| {{
+                    XmlParseError::new(\"expected to find start element\")
+                }})?.to_string();
                 {deserialize}
             }}
 
@@ -283,7 +285,7 @@ fn generate_map_deserializer(shape: &Shape) -> String {
     let entries_parser = format!("
         let mut obj = ::std::collections::HashMap::new();
 
-        while try!(peek_at_name(stack)) == \"{entry_location}\" {{
+        while try!(peek_at_name(stack)) == Some(\"{entry_location}\") {{
             try!(start_element(\"{entry_location}\", stack));
             let key = try!({key_type_name}Deserializer::deserialize(\"{key_tag_name}\", stack));
             let value = try!({value_type_name}Deserializer::deserialize(\"{value_tag_name}\", stack));

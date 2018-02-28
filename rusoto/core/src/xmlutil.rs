@@ -98,13 +98,20 @@ pub fn characters<T: Peek + Next>(stack: &mut T) -> Result<String, XmlParseError
     }
 }
 
-/// get the name of the current element in the stack.  throw a parse error if it's not a `StartElement`
-pub fn peek_at_name<T: Peek + Next>(stack: &mut T) -> Result<String, XmlParseError> {
+/// get the name of the current element in the stack.
+///
+/// Return the name of the `StartElement` or None in case an `EndElement` is encountered
+/// or if no more elements are remaining.
+///
+/// Returns an error if it isn't a `StartElement` or an parse error occurs.
+pub fn peek_at_name<T: Peek + Next>(stack: &mut T) -> Result<Option<&str>, XmlParseError> {
     let current = stack.peek();
-    if let Some(&Ok(XmlEvent::StartElement { ref name, .. })) = current {
-        Ok(name.local_name.to_string())
-    } else {
-        Ok("".to_string())
+    match current {
+        Some(&Ok(XmlEvent::StartElement { ref name, .. })) => Ok(Some(&name.local_name)),
+        Some(&Ok(XmlEvent::EndElement { .. })) => Ok(None),
+        Some(&Ok(ref element)) => Err(XmlParseError(format!("element {:?} is not a `StartElement`", element))),
+        Some(&Err(ref e)) => Err(XmlParseError(format!("failed to peek element: {}", e))),
+        None => Ok(None)
     }
 }
 
@@ -201,17 +208,55 @@ mod tests {
         let my_stack = my_parser.into_iter().peekable();
         let mut reader = XmlResponse::new(my_stack);
 
+        // StartDocument
+        assert!(peek_at_name(&mut reader).unwrap_err().0.contains(" is not a `StartElement`"));
+        reader.next();
+
+        assert_eq!(peek_at_name(&mut reader).unwrap(), Some("ListQueuesResponse"));
+        reader.next();
+
+        assert_eq!(peek_at_name(&mut reader).unwrap(), Some("ListQueuesResult"));
+        reader.next();
+
+        assert_eq!(peek_at_name(&mut reader).unwrap(), Some("QueueUrl"));
+        reader.next();
+
+        // Characters("https://sqs.us-east-1.amazonaws.com/347452556413/testqueue")
+        assert!(peek_at_name(&mut reader).unwrap_err().0.contains(" is not a `StartElement`"));
+
+        // find last element
         loop {
             reader.next();
-            match peek_at_name(&mut reader) {
-                Ok(data) => {
-                    if data == "QueueUrl" {
-                        return;
-                    }
-                }
-                Err(_) => panic!("Couldn't peek at name"),
+            if let Ok(None) = peek_at_name(&mut reader) {
+                break
             }
         }
+
+        match reader.next() {
+            Some(Ok(XmlEvent::EndElement { .. })) => (),
+            e @ _ => panic!("unexpected return value: {:#?}", e),
+        }
+    }
+
+    #[test]
+    fn peek_at_name_malformed_xml() {
+        let body = br#"<?xml version="1.0"?>
+                       <ListQueuesResponse xmlns="http://queue.amazonaws.com/doc/2012-11-05/">
+                           <!-- truncated -->
+                      "#;
+        let parser = EventReader::new(&body[..]);
+        let stack = parser.into_iter().peekable();
+        let mut reader = XmlResponse::new(stack);
+
+        // StartDocument
+        assert!(peek_at_name(&mut reader).unwrap_err().0.contains(" is not a `StartElement`"));
+        reader.next();
+
+        assert_eq!(peek_at_name(&mut reader).unwrap(), Some("ListQueuesResponse"));
+        reader.next();
+
+        // XML is truncated
+        assert!(peek_at_name(&mut reader).unwrap_err().0.starts_with("failed to peek element: "));
     }
 
     #[test]
@@ -290,11 +335,11 @@ mod tests {
 
         // skip first two elements
         find_start_element(&mut reader);
-        assert_eq!(peek_at_name(&mut reader).unwrap(), "ListQueuesResponse");
+        assert_eq!(peek_at_name(&mut reader).unwrap(), Some("ListQueuesResponse"));
 
         // already at start element
         find_start_element(&mut reader);
-        assert_eq!(peek_at_name(&mut reader).unwrap(), "ListQueuesResponse");
+        assert_eq!(peek_at_name(&mut reader).unwrap(), Some("ListQueuesResponse"));
     }
 
 }
