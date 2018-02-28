@@ -1,0 +1,19 @@
+### What Changed
+
+* Have peek_at_name() return an `Option`
+
+  Thus far, it returned `""` when no element was remaining which is error prone and unexpected. Now, `None` is returned in such cases.
+
+* Propagate parser errors
+
+  Until now, `""` was return.
+
+* Return an error if the element isn't a start element
+
+  The documentation already stated that this is the case while in fact it returned `""`.
+
+### Open Issue
+
+Unknown elements are no longer logged.
+
+I'd like to have them logged but I couldn't find a way to do that without copying the name of the element (`name.to_string()`). The issue is that when I move the name (a reference) into one of the branches, it's moved into all and the compiler starts complaining about `stack` being borrowed mutably already. Let me know if there is a sensible way to do this without copying the string. I'm not sure copying it is worth the tradeoff.
