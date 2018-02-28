@@ -98,20 +98,26 @@ pub fn characters<T: Peek + Next>(stack: &mut T) -> Result<String, XmlParseError
     }
 }
 
+pub enum PeekedName<'a> {
+    Start(&'a str),
+    End(&'a str),
+    None,
+}
+
 /// get the name of the current element in the stack.
 ///
 /// Return the name of the `StartElement` or None in case an `EndElement` is encountered
 /// or if no more elements are remaining.
 ///
 /// Returns an error if it isn't a `StartElement` or an parse error occurs.
-pub fn peek_at_name<T: Peek + Next>(stack: &mut T) -> Result<Option<&str>, XmlParseError> {
+pub fn peek_at_name<T: Peek + Next>(stack: &mut T) -> Result<PeekedName, XmlParseError> {
     let current = stack.peek();
     match current {
-        Some(&Ok(XmlEvent::StartElement { ref name, .. })) => Ok(Some(&name.local_name)),
-        Some(&Ok(XmlEvent::EndElement { .. })) => Ok(None),
+        Some(&Ok(XmlEvent::StartElement { ref name, .. })) => Ok(PeekedName::Start(&name.local_name)),
+        Some(&Ok(XmlEvent::EndElement { ref name, .. })) => Ok(PeekedName::End(&name.local_name)),
         Some(&Ok(ref element)) => Err(XmlParseError(format!("element {:?} is not a `StartElement`", element))),
         Some(&Err(ref e)) => Err(XmlParseError(format!("failed to peek element: {}", e))),
-        None => Ok(None)
+        None => Ok(PeekedName::None)
     }
 }
 
