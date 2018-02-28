@@ -641,7 +641,7 @@ impl DatapointValueMapDeserializer {
 
         let mut obj = ::std::collections::HashMap::new();
 
-        while try!(peek_at_name(stack)) == "entry" {
+        while try!(peek_at_name(stack)) == Some("entry") {
             try!(start_element("entry", stack));
             let key = try!(ExtendedStatisticDeserializer::deserialize("key", stack));
             let value = try!(DatapointValueDeserializer::deserialize("value", stack));
@@ -4269,7 +4269,9 @@ where
                     );
                     let mut stack = XmlResponse::new(reader.into_iter().peekable());
                     let _start_document = stack.next();
-                    let actual_tag_name = try!(peek_at_name(&mut stack));
+                    let actual_tag_name = peek_at_name(&mut stack)?
+                        .ok_or_else(|| XmlParseError::new("expected to find start element"))?
+                        .to_string();
                     try!(start_element(&actual_tag_name, &mut stack));
                     result = try!(DeleteDashboardsOutputDeserializer::deserialize(
                         "DeleteDashboardsResult",
@@ -4320,7 +4322,9 @@ where
                     );
                     let mut stack = XmlResponse::new(reader.into_iter().peekable());
                     let _start_document = stack.next();
-                    let actual_tag_name = try!(peek_at_name(&mut stack));
+                    let actual_tag_name = peek_at_name(&mut stack)?
+                        .ok_or_else(|| XmlParseError::new("expected to find start element"))?
+                        .to_string();
                     try!(start_element(&actual_tag_name, &mut stack));
                     result = try!(DescribeAlarmHistoryOutputDeserializer::deserialize(
                         "DescribeAlarmHistoryResult",
@@ -4371,7 +4375,9 @@ where
                     );
                     let mut stack = XmlResponse::new(reader.into_iter().peekable());
                     let _start_document = stack.next();
-                    let actual_tag_name = try!(peek_at_name(&mut stack));
+                    let actual_tag_name = peek_at_name(&mut stack)?
+                        .ok_or_else(|| XmlParseError::new("expected to find start element"))?
+                        .to_string();
                     try!(start_element(&actual_tag_name, &mut stack));
                     result = try!(DescribeAlarmsOutputDeserializer::deserialize(
                         "DescribeAlarmsResult",
@@ -4422,7 +4428,9 @@ where
                     );
                     let mut stack = XmlResponse::new(reader.into_iter().peekable());
                     let _start_document = stack.next();
-                    let actual_tag_name = try!(peek_at_name(&mut stack));
+                    let actual_tag_name = peek_at_name(&mut stack)?
+                        .ok_or_else(|| XmlParseError::new("expected to find start element"))?
+                        .to_string();
                     try!(start_element(&actual_tag_name, &mut stack));
                     result = try!(DescribeAlarmsForMetricOutputDeserializer::deserialize(
                         "DescribeAlarmsForMetricResult",
@@ -4529,7 +4537,9 @@ where
                     );
                     let mut stack = XmlResponse::new(reader.into_iter().peekable());
                     let _start_document = stack.next();
-                    let actual_tag_name = try!(peek_at_name(&mut stack));
+                    let actual_tag_name = peek_at_name(&mut stack)?
+                        .ok_or_else(|| XmlParseError::new("expected to find start element"))?
+                        .to_string();
                     try!(start_element(&actual_tag_name, &mut stack));
                     result = try!(GetDashboardOutputDeserializer::deserialize(
                         "GetDashboardResult",
@@ -4580,7 +4590,9 @@ where
                     );
                     let mut stack = XmlResponse::new(reader.into_iter().peekable());
                     let _start_document = stack.next();
-                    let actual_tag_name = try!(peek_at_name(&mut stack));
+                    let actual_tag_name = peek_at_name(&mut stack)?
+                        .ok_or_else(|| XmlParseError::new("expected to find start element"))?
+                        .to_string();
                     try!(start_element(&actual_tag_name, &mut stack));
                     result = try!(GetMetricStatisticsOutputDeserializer::deserialize(
                         "GetMetricStatisticsResult",
@@ -4631,7 +4643,9 @@ where
                     );
                     let mut stack = XmlResponse::new(reader.into_iter().peekable());
                     let _start_document = stack.next();
-                    let actual_tag_name = try!(peek_at_name(&mut stack));
+                    let actual_tag_name = peek_at_name(&mut stack)?
+                        .ok_or_else(|| XmlParseError::new("expected to find start element"))?
+                        .to_string();
                     try!(start_element(&actual_tag_name, &mut stack));
                     result = try!(ListDashboardsOutputDeserializer::deserialize(
                         "ListDashboardsResult",
@@ -4682,7 +4696,9 @@ where
                     );
                     let mut stack = XmlResponse::new(reader.into_iter().peekable());
                     let _start_document = stack.next();
-                    let actual_tag_name = try!(peek_at_name(&mut stack));
+                    let actual_tag_name = peek_at_name(&mut stack)?
+                        .ok_or_else(|| XmlParseError::new("expected to find start element"))?
+                        .to_string();
                     try!(start_element(&actual_tag_name, &mut stack));
                     result = try!(ListMetricsOutputDeserializer::deserialize(
                         "ListMetricsResult",
@@ -4733,7 +4749,9 @@ where
                     );
                     let mut stack = XmlResponse::new(reader.into_iter().peekable());
                     let _start_document = stack.next();
-                    let actual_tag_name = try!(peek_at_name(&mut stack));
+                    let actual_tag_name = peek_at_name(&mut stack)?
+                        .ok_or_else(|| XmlParseError::new("expected to find start element"))?
+                        .to_string();
                     try!(start_element(&actual_tag_name, &mut stack));
                     result = try!(PutDashboardOutputDeserializer::deserialize(
                         "PutDashboardResult",

@@ -15155,7 +15155,9 @@ where
                     );
                     let mut stack = XmlResponse::new(reader.into_iter().peekable());
                     let _start_document = stack.next();
-                    let actual_tag_name = try!(peek_at_name(&mut stack));
+                    let actual_tag_name = peek_at_name(&mut stack)?
+                        .ok_or_else(|| XmlParseError::new("expected to find start element"))?
+                        .to_string();
                     result = try!(
                         AssociateVPCWithHostedZoneResponseDeserializer::deserialize(
                             &actual_tag_name,
@@ -15217,7 +15219,9 @@ where
                     );
                     let mut stack = XmlResponse::new(reader.into_iter().peekable());
                     let _start_document = stack.next();
-                    let actual_tag_name = try!(peek_at_name(&mut stack));
+                    let actual_tag_name = peek_at_name(&mut stack)?
+                        .ok_or_else(|| XmlParseError::new("expected to find start element"))?
+                        .to_string();
                     result = try!(ChangeResourceRecordSetsResponseDeserializer::deserialize(
                         &actual_tag_name,
                         &mut stack
@@ -15278,7 +15282,9 @@ where
                     );
                     let mut stack = XmlResponse::new(reader.into_iter().peekable());
                     let _start_document = stack.next();
-                    let actual_tag_name = try!(peek_at_name(&mut stack));
+                    let actual_tag_name = peek_at_name(&mut stack)?
+                        .ok_or_else(|| XmlParseError::new("expected to find start element"))?
+                        .to_string();
                     result = try!(ChangeTagsForResourceResponseDeserializer::deserialize(
                         &actual_tag_name,
                         &mut stack
@@ -15335,7 +15341,9 @@ where
                     );
                     let mut stack = XmlResponse::new(reader.into_iter().peekable());
                     let _start_document = stack.next();
-                    let actual_tag_name = try!(peek_at_name(&mut stack));
+                    let actual_tag_name = peek_at_name(&mut stack)?
+                        .ok_or_else(|| XmlParseError::new("expected to find start element"))?
+                        .to_string();
                     result = try!(CreateHealthCheckResponseDeserializer::deserialize(
                         &actual_tag_name,
                         &mut stack
@@ -15394,7 +15402,9 @@ where
                     );
                     let mut stack = XmlResponse::new(reader.into_iter().peekable());
                     let _start_document = stack.next();
-                    let actual_tag_name = try!(peek_at_name(&mut stack));
+                    let actual_tag_name = peek_at_name(&mut stack)?
+                        .ok_or_else(|| XmlParseError::new("expected to find start element"))?
+                        .to_string();
                     result = try!(CreateHostedZoneResponseDeserializer::deserialize(
                         &actual_tag_name,
                         &mut stack
@@ -15453,7 +15463,9 @@ where
                     );
                     let mut stack = XmlResponse::new(reader.into_iter().peekable());
                     let _start_document = stack.next();
-                    let actual_tag_name = try!(peek_at_name(&mut stack));
+                    let actual_tag_name = peek_at_name(&mut stack)?
+                        .ok_or_else(|| XmlParseError::new("expected to find start element"))?
+                        .to_string();
                     result = try!(CreateQueryLoggingConfigResponseDeserializer::deserialize(
                         &actual_tag_name,
                         &mut stack
@@ -15512,7 +15524,9 @@ where
                     );
                     let mut stack = XmlResponse::new(reader.into_iter().peekable());
                     let _start_document = stack.next();
-                    let actual_tag_name = try!(peek_at_name(&mut stack));
+                    let actual_tag_name = peek_at_name(&mut stack)?
+                        .ok_or_else(|| XmlParseError::new("expected to find start element"))?
+                        .to_string();
                     result = try!(
                         CreateReusableDelegationSetResponseDeserializer::deserialize(
                             &actual_tag_name,
@@ -15573,7 +15587,9 @@ where
                     );
                     let mut stack = XmlResponse::new(reader.into_iter().peekable());
                     let _start_document = stack.next();
-                    let actual_tag_name = try!(peek_at_name(&mut stack));
+                    let actual_tag_name = peek_at_name(&mut stack)?
+                        .ok_or_else(|| XmlParseError::new("expected to find start element"))?
+                        .to_string();
                     result = try!(CreateTrafficPolicyResponseDeserializer::deserialize(
                         &actual_tag_name,
                         &mut stack
@@ -15632,7 +15648,9 @@ where
                     );
                     let mut stack = XmlResponse::new(reader.into_iter().peekable());
                     let _start_document = stack.next();
-                    let actual_tag_name = try!(peek_at_name(&mut stack));
+                    let actual_tag_name = peek_at_name(&mut stack)?
+                        .ok_or_else(|| XmlParseError::new("expected to find start element"))?
+                        .to_string();
                     result = try!(
                         CreateTrafficPolicyInstanceResponseDeserializer::deserialize(
                             &actual_tag_name,
@@ -15693,7 +15711,9 @@ where
                     );
                     let mut stack = XmlResponse::new(reader.into_iter().peekable());
                     let _start_document = stack.next();
-                    let actual_tag_name = try!(peek_at_name(&mut stack));
+                    let actual_tag_name = peek_at_name(&mut stack)?
+                        .ok_or_else(|| XmlParseError::new("expected to find start element"))?
+                        .to_string();
                     result = try!(
                         CreateTrafficPolicyVersionResponseDeserializer::deserialize(
                             &actual_tag_name,
@@ -15760,7 +15780,9 @@ where
                     );
                     let mut stack = XmlResponse::new(reader.into_iter().peekable());
                     let _start_document = stack.next();
-                    let actual_tag_name = try!(peek_at_name(&mut stack));
+                    let actual_tag_name = peek_at_name(&mut stack)?
+                        .ok_or_else(|| XmlParseError::new("expected to find start element"))?
+                        .to_string();
                     result = try!(
                         CreateVPCAssociationAuthorizationResponseDeserializer::deserialize(
                             &actual_tag_name,
@@ -15812,7 +15834,9 @@ where
                     );
                     let mut stack = XmlResponse::new(reader.into_iter().peekable());
                     let _start_document = stack.next();
-                    let actual_tag_name = try!(peek_at_name(&mut stack));
+                    let actual_tag_name = peek_at_name(&mut stack)?
+                        .ok_or_else(|| XmlParseError::new("expected to find start element"))?
+                        .to_string();
                     result = try!(DeleteHealthCheckResponseDeserializer::deserialize(
                         &actual_tag_name,
                         &mut stack
@@ -15859,7 +15883,9 @@ where
                     );
                     let mut stack = XmlResponse::new(reader.into_iter().peekable());
                     let _start_document = stack.next();
-                    let actual_tag_name = try!(peek_at_name(&mut stack));
+                    let actual_tag_name = peek_at_name(&mut stack)?
+                        .ok_or_else(|| XmlParseError::new("expected to find start element"))?
+                        .to_string();
                     result = try!(DeleteHostedZoneResponseDeserializer::deserialize(
                         &actual_tag_name,
                         &mut stack
@@ -15906,7 +15932,9 @@ where
                     );
                     let mut stack = XmlResponse::new(reader.into_iter().peekable());
                     let _start_document = stack.next();
-                    let actual_tag_name = try!(peek_at_name(&mut stack));
+                    let actual_tag_name = peek_at_name(&mut stack)?
+                        .ok_or_else(|| XmlParseError::new("expected to find start element"))?
+                        .to_string();
                     result = try!(DeleteQueryLoggingConfigResponseDeserializer::deserialize(
                         &actual_tag_name,
                         &mut stack
@@ -15953,7 +15981,9 @@ where
                     );
                     let mut stack = XmlResponse::new(reader.into_iter().peekable());
                     let _start_document = stack.next();
-                    let actual_tag_name = try!(peek_at_name(&mut stack));
+                    let actual_tag_name = peek_at_name(&mut stack)?
+                        .ok_or_else(|| XmlParseError::new("expected to find start element"))?
+                        .to_string();
                     result = try!(
                         DeleteReusableDelegationSetResponseDeserializer::deserialize(
                             &actual_tag_name,
@@ -16006,7 +16036,9 @@ where
                     );
                     let mut stack = XmlResponse::new(reader.into_iter().peekable());
                     let _start_document = stack.next();
-                    let actual_tag_name = try!(peek_at_name(&mut stack));
+                    let actual_tag_name = peek_at_name(&mut stack)?
+                        .ok_or_else(|| XmlParseError::new("expected to find start element"))?
+                        .to_string();
                     result = try!(DeleteTrafficPolicyResponseDeserializer::deserialize(
                         &actual_tag_name,
                         &mut stack
@@ -16053,7 +16085,9 @@ where
                     );
                     let mut stack = XmlResponse::new(reader.into_iter().peekable());
                     let _start_document = stack.next();
-                    let actual_tag_name = try!(peek_at_name(&mut stack));
+                    let actual_tag_name = peek_at_name(&mut stack)?
+                        .ok_or_else(|| XmlParseError::new("expected to find start element"))?
+                        .to_string();
                     result = try!(
                         DeleteTrafficPolicyInstanceResponseDeserializer::deserialize(
                             &actual_tag_name,
@@ -16118,7 +16152,9 @@ where
                     );
                     let mut stack = XmlResponse::new(reader.into_iter().peekable());
                     let _start_document = stack.next();
-                    let actual_tag_name = try!(peek_at_name(&mut stack));
+                    let actual_tag_name = peek_at_name(&mut stack)?
+                        .ok_or_else(|| XmlParseError::new("expected to find start element"))?
+                        .to_string();
                     result = try!(
                         DeleteVPCAssociationAuthorizationResponseDeserializer::deserialize(
                             &actual_tag_name,
@@ -16181,7 +16217,9 @@ where
                     );
                     let mut stack = XmlResponse::new(reader.into_iter().peekable());
                     let _start_document = stack.next();
-                    let actual_tag_name = try!(peek_at_name(&mut stack));
+                    let actual_tag_name = peek_at_name(&mut stack)?
+                        .ok_or_else(|| XmlParseError::new("expected to find start element"))?
+                        .to_string();
                     result = try!(
                         DisassociateVPCFromHostedZoneResponseDeserializer::deserialize(
                             &actual_tag_name,
@@ -16230,7 +16268,9 @@ where
                     );
                     let mut stack = XmlResponse::new(reader.into_iter().peekable());
                     let _start_document = stack.next();
-                    let actual_tag_name = try!(peek_at_name(&mut stack));
+                    let actual_tag_name = peek_at_name(&mut stack)?
+                        .ok_or_else(|| XmlParseError::new("expected to find start element"))?
+                        .to_string();
                     result = try!(GetAccountLimitResponseDeserializer::deserialize(
                         &actual_tag_name,
                         &mut stack
@@ -16277,7 +16317,9 @@ where
                     );
                     let mut stack = XmlResponse::new(reader.into_iter().peekable());
                     let _start_document = stack.next();
-                    let actual_tag_name = try!(peek_at_name(&mut stack));
+                    let actual_tag_name = peek_at_name(&mut stack)?
+                        .ok_or_else(|| XmlParseError::new("expected to find start element"))?
+                        .to_string();
                     result = try!(GetChangeResponseDeserializer::deserialize(
                         &actual_tag_name,
                         &mut stack
@@ -16324,7 +16366,9 @@ where
                     );
                     let mut stack = XmlResponse::new(reader.into_iter().peekable());
                     let _start_document = stack.next();
-                    let actual_tag_name = try!(peek_at_name(&mut stack));
+                    let actual_tag_name = peek_at_name(&mut stack)?
+                        .ok_or_else(|| XmlParseError::new("expected to find start element"))?
+                        .to_string();
                     result = try!(GetCheckerIpRangesResponseDeserializer::deserialize(
                         &actual_tag_name,
                         &mut stack
@@ -16383,7 +16427,9 @@ where
                     );
                     let mut stack = XmlResponse::new(reader.into_iter().peekable());
                     let _start_document = stack.next();
-                    let actual_tag_name = try!(peek_at_name(&mut stack));
+                    let actual_tag_name = peek_at_name(&mut stack)?
+                        .ok_or_else(|| XmlParseError::new("expected to find start element"))?
+                        .to_string();
                     result = try!(GetGeoLocationResponseDeserializer::deserialize(
                         &actual_tag_name,
                         &mut stack
@@ -16433,7 +16479,9 @@ where
                     );
                     let mut stack = XmlResponse::new(reader.into_iter().peekable());
                     let _start_document = stack.next();
-                    let actual_tag_name = try!(peek_at_name(&mut stack));
+                    let actual_tag_name = peek_at_name(&mut stack)?
+                        .ok_or_else(|| XmlParseError::new("expected to find start element"))?
+                        .to_string();
                     result = try!(GetHealthCheckResponseDeserializer::deserialize(
                         &actual_tag_name,
                         &mut stack
@@ -16480,7 +16528,9 @@ where
                     );
                     let mut stack = XmlResponse::new(reader.into_iter().peekable());
                     let _start_document = stack.next();
-                    let actual_tag_name = try!(peek_at_name(&mut stack));
+                    let actual_tag_name = peek_at_name(&mut stack)?
+                        .ok_or_else(|| XmlParseError::new("expected to find start element"))?
+                        .to_string();
                     result = try!(GetHealthCheckCountResponseDeserializer::deserialize(
                         &actual_tag_name,
                         &mut stack
@@ -16531,7 +16581,9 @@ where
                     );
                     let mut stack = XmlResponse::new(reader.into_iter().peekable());
                     let _start_document = stack.next();
-                    let actual_tag_name = try!(peek_at_name(&mut stack));
+                    let actual_tag_name = peek_at_name(&mut stack)?
+                        .ok_or_else(|| XmlParseError::new("expected to find start element"))?
+                        .to_string();
                     result = try!(
                         GetHealthCheckLastFailureReasonResponseDeserializer::deserialize(
                             &actual_tag_name,
@@ -16583,7 +16635,9 @@ where
                     );
                     let mut stack = XmlResponse::new(reader.into_iter().peekable());
                     let _start_document = stack.next();
-                    let actual_tag_name = try!(peek_at_name(&mut stack));
+                    let actual_tag_name = peek_at_name(&mut stack)?
+                        .ok_or_else(|| XmlParseError::new("expected to find start element"))?
+                        .to_string();
                     result = try!(GetHealthCheckStatusResponseDeserializer::deserialize(
                         &actual_tag_name,
                         &mut stack
@@ -16630,7 +16684,9 @@ where
                     );
                     let mut stack = XmlResponse::new(reader.into_iter().peekable());
                     let _start_document = stack.next();
-                    let actual_tag_name = try!(peek_at_name(&mut stack));
+                    let actual_tag_name = peek_at_name(&mut stack)?
+                        .ok_or_else(|| XmlParseError::new("expected to find start element"))?
+                        .to_string();
                     result = try!(GetHostedZoneResponseDeserializer::deserialize(
                         &actual_tag_name,
                         &mut stack
@@ -16677,7 +16733,9 @@ where
                     );
                     let mut stack = XmlResponse::new(reader.into_iter().peekable());
                     let _start_document = stack.next();
-                    let actual_tag_name = try!(peek_at_name(&mut stack));
+                    let actual_tag_name = peek_at_name(&mut stack)?
+                        .ok_or_else(|| XmlParseError::new("expected to find start element"))?
+                        .to_string();
                     result = try!(GetHostedZoneCountResponseDeserializer::deserialize(
                         &actual_tag_name,
                         &mut stack
@@ -16724,7 +16782,9 @@ where
                     );
                     let mut stack = XmlResponse::new(reader.into_iter().peekable());
                     let _start_document = stack.next();
-                    let actual_tag_name = try!(peek_at_name(&mut stack));
+                    let actual_tag_name = peek_at_name(&mut stack)?
+                        .ok_or_else(|| XmlParseError::new("expected to find start element"))?
+                        .to_string();
                     result = try!(GetHostedZoneLimitResponseDeserializer::deserialize(
                         &actual_tag_name,
                         &mut stack
@@ -16771,7 +16831,9 @@ where
                     );
                     let mut stack = XmlResponse::new(reader.into_iter().peekable());
                     let _start_document = stack.next();
-                    let actual_tag_name = try!(peek_at_name(&mut stack));
+                    let actual_tag_name = peek_at_name(&mut stack)?
+                        .ok_or_else(|| XmlParseError::new("expected to find start element"))?
+                        .to_string();
                     result = try!(GetQueryLoggingConfigResponseDeserializer::deserialize(
                         &actual_tag_name,
                         &mut stack
@@ -16818,7 +16880,9 @@ where
                     );
                     let mut stack = XmlResponse::new(reader.into_iter().peekable());
                     let _start_document = stack.next();
-                    let actual_tag_name = try!(peek_at_name(&mut stack));
+                    let actual_tag_name = peek_at_name(&mut stack)?
+                        .ok_or_else(|| XmlParseError::new("expected to find start element"))?
+                        .to_string();
                     result = try!(GetReusableDelegationSetResponseDeserializer::deserialize(
                         &actual_tag_name,
                         &mut stack
@@ -16866,7 +16930,9 @@ where
                     );
                     let mut stack = XmlResponse::new(reader.into_iter().peekable());
                     let _start_document = stack.next();
-                    let actual_tag_name = try!(peek_at_name(&mut stack));
+                    let actual_tag_name = peek_at_name(&mut stack)?
+                        .ok_or_else(|| XmlParseError::new("expected to find start element"))?
+                        .to_string();
                     result = try!(
                         GetReusableDelegationSetLimitResponseDeserializer::deserialize(
                             &actual_tag_name,
@@ -16919,7 +16985,9 @@ where
                     );
                     let mut stack = XmlResponse::new(reader.into_iter().peekable());
                     let _start_document = stack.next();
-                    let actual_tag_name = try!(peek_at_name(&mut stack));
+                    let actual_tag_name = peek_at_name(&mut stack)?
+                        .ok_or_else(|| XmlParseError::new("expected to find start element"))?
+                        .to_string();
                     result = try!(GetTrafficPolicyResponseDeserializer::deserialize(
                         &actual_tag_name,
                         &mut stack
@@ -16966,7 +17034,9 @@ where
                     );
                     let mut stack = XmlResponse::new(reader.into_iter().peekable());
                     let _start_document = stack.next();
-                    let actual_tag_name = try!(peek_at_name(&mut stack));
+                    let actual_tag_name = peek_at_name(&mut stack)?
+                        .ok_or_else(|| XmlParseError::new("expected to find start element"))?
+                        .to_string();
                     result = try!(GetTrafficPolicyInstanceResponseDeserializer::deserialize(
                         &actual_tag_name,
                         &mut stack
@@ -17014,7 +17084,9 @@ where
                     );
                     let mut stack = XmlResponse::new(reader.into_iter().peekable());
                     let _start_document = stack.next();
-                    let actual_tag_name = try!(peek_at_name(&mut stack));
+                    let actual_tag_name = peek_at_name(&mut stack)?
+                        .ok_or_else(|| XmlParseError::new("expected to find start element"))?
+                        .to_string();
                     result = try!(
                         GetTrafficPolicyInstanceCountResponseDeserializer::deserialize(
                             &actual_tag_name,
@@ -17078,7 +17150,9 @@ where
                     );
                     let mut stack = XmlResponse::new(reader.into_iter().peekable());
                     let _start_document = stack.next();
-                    let actual_tag_name = try!(peek_at_name(&mut stack));
+                    let actual_tag_name = peek_at_name(&mut stack)?
+                        .ok_or_else(|| XmlParseError::new("expected to find start element"))?
+                        .to_string();
                     result = try!(ListGeoLocationsResponseDeserializer::deserialize(
                         &actual_tag_name,
                         &mut stack
@@ -17134,7 +17208,9 @@ where
                     );
                     let mut stack = XmlResponse::new(reader.into_iter().peekable());
                     let _start_document = stack.next();
-                    let actual_tag_name = try!(peek_at_name(&mut stack));
+                    let actual_tag_name = peek_at_name(&mut stack)?
+                        .ok_or_else(|| XmlParseError::new("expected to find start element"))?
+                        .to_string();
                     result = try!(ListHealthChecksResponseDeserializer::deserialize(
                         &actual_tag_name,
                         &mut stack
@@ -17193,7 +17269,9 @@ where
                     );
                     let mut stack = XmlResponse::new(reader.into_iter().peekable());
                     let _start_document = stack.next();
-                    let actual_tag_name = try!(peek_at_name(&mut stack));
+                    let actual_tag_name = peek_at_name(&mut stack)?
+                        .ok_or_else(|| XmlParseError::new("expected to find start element"))?
+                        .to_string();
                     result = try!(ListHostedZonesResponseDeserializer::deserialize(
                         &actual_tag_name,
                         &mut stack
@@ -17252,7 +17330,9 @@ where
                     );
                     let mut stack = XmlResponse::new(reader.into_iter().peekable());
                     let _start_document = stack.next();
-                    let actual_tag_name = try!(peek_at_name(&mut stack));
+                    let actual_tag_name = peek_at_name(&mut stack)?
+                        .ok_or_else(|| XmlParseError::new("expected to find start element"))?
+                        .to_string();
                     result = try!(ListHostedZonesByNameResponseDeserializer::deserialize(
                         &actual_tag_name,
                         &mut stack
@@ -17311,7 +17391,9 @@ where
                     );
                     let mut stack = XmlResponse::new(reader.into_iter().peekable());
                     let _start_document = stack.next();
-                    let actual_tag_name = try!(peek_at_name(&mut stack));
+                    let actual_tag_name = peek_at_name(&mut stack)?
+                        .ok_or_else(|| XmlParseError::new("expected to find start element"))?
+                        .to_string();
                     result = try!(ListQueryLoggingConfigsResponseDeserializer::deserialize(
                         &actual_tag_name,
                         &mut stack
@@ -17376,7 +17458,9 @@ where
                     );
                     let mut stack = XmlResponse::new(reader.into_iter().peekable());
                     let _start_document = stack.next();
-                    let actual_tag_name = try!(peek_at_name(&mut stack));
+                    let actual_tag_name = peek_at_name(&mut stack)?
+                        .ok_or_else(|| XmlParseError::new("expected to find start element"))?
+                        .to_string();
                     result = try!(ListResourceRecordSetsResponseDeserializer::deserialize(
                         &actual_tag_name,
                         &mut stack
@@ -17432,7 +17516,9 @@ where
                     );
                     let mut stack = XmlResponse::new(reader.into_iter().peekable());
                     let _start_document = stack.next();
-                    let actual_tag_name = try!(peek_at_name(&mut stack));
+                    let actual_tag_name = peek_at_name(&mut stack)?
+                        .ok_or_else(|| XmlParseError::new("expected to find start element"))?
+                        .to_string();
                     result = try!(
                         ListReusableDelegationSetsResponseDeserializer::deserialize(
                             &actual_tag_name,
@@ -17485,7 +17571,9 @@ where
                     );
                     let mut stack = XmlResponse::new(reader.into_iter().peekable());
                     let _start_document = stack.next();
-                    let actual_tag_name = try!(peek_at_name(&mut stack));
+                    let actual_tag_name = peek_at_name(&mut stack)?
+                        .ok_or_else(|| XmlParseError::new("expected to find start element"))?
+                        .to_string();
                     result = try!(ListTagsForResourceResponseDeserializer::deserialize(
                         &actual_tag_name,
                         &mut stack
@@ -17545,7 +17633,9 @@ where
                     );
                     let mut stack = XmlResponse::new(reader.into_iter().peekable());
                     let _start_document = stack.next();
-                    let actual_tag_name = try!(peek_at_name(&mut stack));
+                    let actual_tag_name = peek_at_name(&mut stack)?
+                        .ok_or_else(|| XmlParseError::new("expected to find start element"))?
+                        .to_string();
                     result = try!(ListTagsForResourcesResponseDeserializer::deserialize(
                         &actual_tag_name,
                         &mut stack
@@ -17601,7 +17691,9 @@ where
                     );
                     let mut stack = XmlResponse::new(reader.into_iter().peekable());
                     let _start_document = stack.next();
-                    let actual_tag_name = try!(peek_at_name(&mut stack));
+                    let actual_tag_name = peek_at_name(&mut stack)?
+                        .ok_or_else(|| XmlParseError::new("expected to find start element"))?
+                        .to_string();
                     result = try!(ListTrafficPoliciesResponseDeserializer::deserialize(
                         &actual_tag_name,
                         &mut stack
@@ -17663,7 +17755,9 @@ where
                     );
                     let mut stack = XmlResponse::new(reader.into_iter().peekable());
                     let _start_document = stack.next();
-                    let actual_tag_name = try!(peek_at_name(&mut stack));
+                    let actual_tag_name = peek_at_name(&mut stack)?
+                        .ok_or_else(|| XmlParseError::new("expected to find start element"))?
+                        .to_string();
                     result = try!(
                         ListTrafficPolicyInstancesResponseDeserializer::deserialize(
                             &actual_tag_name,
@@ -17728,7 +17822,9 @@ where
                     );
                     let mut stack = XmlResponse::new(reader.into_iter().peekable());
                     let _start_document = stack.next();
-                    let actual_tag_name = try!(peek_at_name(&mut stack));
+                    let actual_tag_name = peek_at_name(&mut stack)?
+                        .ok_or_else(|| XmlParseError::new("expected to find start element"))?
+                        .to_string();
                     result = try!(
                         ListTrafficPolicyInstancesByHostedZoneResponseDeserializer::deserialize(
                             &actual_tag_name,
@@ -17797,7 +17893,9 @@ where
                     );
                     let mut stack = XmlResponse::new(reader.into_iter().peekable());
                     let _start_document = stack.next();
-                    let actual_tag_name = try!(peek_at_name(&mut stack));
+                    let actual_tag_name = peek_at_name(&mut stack)?
+                        .ok_or_else(|| XmlParseError::new("expected to find start element"))?
+                        .to_string();
                     result = try!(
                         ListTrafficPolicyInstancesByPolicyResponseDeserializer::deserialize(
                             &actual_tag_name,
@@ -17855,7 +17953,9 @@ where
                     );
                     let mut stack = XmlResponse::new(reader.into_iter().peekable());
                     let _start_document = stack.next();
-                    let actual_tag_name = try!(peek_at_name(&mut stack));
+                    let actual_tag_name = peek_at_name(&mut stack)?
+                        .ok_or_else(|| XmlParseError::new("expected to find start element"))?
+                        .to_string();
                     result = try!(ListTrafficPolicyVersionsResponseDeserializer::deserialize(
                         &actual_tag_name,
                         &mut stack
@@ -17915,7 +18015,9 @@ where
                     );
                     let mut stack = XmlResponse::new(reader.into_iter().peekable());
                     let _start_document = stack.next();
-                    let actual_tag_name = try!(peek_at_name(&mut stack));
+                    let actual_tag_name = peek_at_name(&mut stack)?
+                        .ok_or_else(|| XmlParseError::new("expected to find start element"))?
+                        .to_string();
                     result = try!(
                         ListVPCAssociationAuthorizationsResponseDeserializer::deserialize(
                             &actual_tag_name,
@@ -17979,7 +18081,9 @@ where
                     );
                     let mut stack = XmlResponse::new(reader.into_iter().peekable());
                     let _start_document = stack.next();
-                    let actual_tag_name = try!(peek_at_name(&mut stack));
+                    let actual_tag_name = peek_at_name(&mut stack)?
+                        .ok_or_else(|| XmlParseError::new("expected to find start element"))?
+                        .to_string();
                     result = try!(TestDNSAnswerResponseDeserializer::deserialize(
                         &actual_tag_name,
                         &mut stack
@@ -18039,7 +18143,9 @@ where
                     );
                     let mut stack = XmlResponse::new(reader.into_iter().peekable());
                     let _start_document = stack.next();
-                    let actual_tag_name = try!(peek_at_name(&mut stack));
+                    let actual_tag_name = peek_at_name(&mut stack)?
+                        .ok_or_else(|| XmlParseError::new("expected to find start element"))?
+                        .to_string();
                     result = try!(UpdateHealthCheckResponseDeserializer::deserialize(
                         &actual_tag_name,
                         &mut stack
@@ -18096,7 +18202,9 @@ where
                     );
                     let mut stack = XmlResponse::new(reader.into_iter().peekable());
                     let _start_document = stack.next();
-                    let actual_tag_name = try!(peek_at_name(&mut stack));
+                    let actual_tag_name = peek_at_name(&mut stack)?
+                        .ok_or_else(|| XmlParseError::new("expected to find start element"))?
+                        .to_string();
                     result = try!(UpdateHostedZoneCommentResponseDeserializer::deserialize(
                         &actual_tag_name,
                         &mut stack
@@ -18157,7 +18265,9 @@ where
                     );
                     let mut stack = XmlResponse::new(reader.into_iter().peekable());
                     let _start_document = stack.next();
-                    let actual_tag_name = try!(peek_at_name(&mut stack));
+                    let actual_tag_name = peek_at_name(&mut stack)?
+                        .ok_or_else(|| XmlParseError::new("expected to find start element"))?
+                        .to_string();
                     result = try!(
                         UpdateTrafficPolicyCommentResponseDeserializer::deserialize(
                             &actual_tag_name,
@@ -18216,7 +18326,9 @@ where
                     );
                     let mut stack = XmlResponse::new(reader.into_iter().peekable());
                     let _start_document = stack.next();
-                    let actual_tag_name = try!(peek_at_name(&mut stack));
+                    let actual_tag_name = peek_at_name(&mut stack)?
+                        .ok_or_else(|| XmlParseError::new("expected to find start element"))?
+                        .to_string();
                     result = try!(
                         UpdateTrafficPolicyInstanceResponseDeserializer::deserialize(
                             &actual_tag_name,
