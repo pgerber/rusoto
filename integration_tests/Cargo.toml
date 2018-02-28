@@ -630,3 +630,6 @@ xray = ["rusoto_xray"]
 nightly-testing = ["rusoto_core/nightly-testing"]
 disable_ceph_unsupported = []
 disable_minio_unsupported = []
+
+[replace]
+"tokio-core:0.1.14" = { git = "https://github.com/carllerche/tokio-core", branch = "fix-remote-queue" }
