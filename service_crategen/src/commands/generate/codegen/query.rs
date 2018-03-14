@@ -48,6 +48,8 @@ impl GenerateProtocol for QueryGenerator {
                         {parse_payload}
                     }});
 
+                    let missing_in_generated_file = true;
+
                     RusotoFuture::new(future)
                 }}
                 ",
