@@ -63,6 +63,9 @@ impl GenerateProtocol for QueryGenerator {
                      request_uri = &operation.http.request_uri,
                      serialize_input = generate_method_input_serialization(operation))?;
         }
+
+        // added comment
+
         Ok(())
     }
 
