@@ -1,7 +1,7 @@
 #!/bin/bash
 set -Eeu
 
-cd "$GIT_ROOT/service_crategen"
+cd service_crategen
 git submodule update --init
 cargo +nightly run -- generate -c ./services.json -o ../rusoto/services
 diff=$(git diff)
