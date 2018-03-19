@@ -19,11 +19,18 @@ os:
 before_install:
   - if [ "$TRAVIS_OS_NAME" = "osx" ]; then ulimit -n 1024; fi
   - rustup install nightly
-script:
   - |
-      echo "Generating service crates..." &&
-      ( cd service_crategen && \
-        cargo +nightly run -- generate -c ./services.json -o ../rusoto/services )
+      current_version=$(rustc --version)
+      cache_version=$(target/version)
+      if [ "$current_version" != "$cached_version" ];
+        rm -rf target/* integration_tests/* service_crategen/target/*
+      fi
+  - rustc --version >target/version
+script:
+  #- |
+  #    echo "Generating service crates..." &&
+  #    ( cd service_crategen && \
+  #      cargo +nightly run -- generate -c ./services.json -o ../rusoto/services )
   - echo "Running Rusoto tests" && cargo update && cargo test --lib --all -v
   - |
       echo "Building integration tests" &&
