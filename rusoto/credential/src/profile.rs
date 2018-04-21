@@ -1,8 +1,11 @@
 //! The Credentials Provider for Credentials stored in a profile inside of a Credentials file.
 
+#![warn(unused_variables)]     // FIXME: remove
+#![warn(warnings)]
+
 use std::collections::HashMap;
+use std::convert::AsRef;
 use std::env::{home_dir};
-use std::fs;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
 use std::path::{Path, PathBuf};
@@ -17,11 +20,17 @@ const AWS_PROFILE: &str = "AWS_PROFILE";
 const AWS_SHARED_CREDENTIALS_FILE: &str = "AWS_SHARED_CREDENTIALS_FILE";
 const DEFAULT: &str = "default";
 
+lazy_static! {
+    static ref IS_VALID_IDENTIFIER: Regex = Regex::new("^[A-Za-z0-9_\\-]*$").unwrap();
+}
+
 /// Provides AWS credentials from a profile in a credentials file.
 #[derive(Clone, Debug)]
 pub struct ProfileProvider {
-    /// The File Path the Credentials File is located at.
-    file_path: PathBuf,
+    /// The path to the AWS config file.
+    config_file_path: Option<PathBuf>,
+    /// The File Path the AWS Credentials File is located at.
+    credentials_file_path: Option<PathBuf>,
     /// The Profile Path to parse out of the Credentials File.
     profile: String,
 }
@@ -41,8 +50,10 @@ impl ProfileProvider {
         F: Into<PathBuf>,
         P: Into<String>,
     {
+        let path = file_path.into();
         ProfileProvider {
-            file_path: file_path.into(),
+            config_file_path: Some(path.clone()),  // FIXME: correct path
+            credentials_file_path: Some(path),     // FIXME
             profile: profile.into(),
         }
     }
@@ -89,9 +100,14 @@ impl ProfileProvider {
         non_empty_env_var(AWS_PROFILE).unwrap_or_else(|| DEFAULT.to_owned())
     }
 
-    /// Get a reference to the credentials file path.
-    pub fn file_path(&self) -> &Path {
-        self.file_path.as_ref()
+    /// Get a reference to the AWS credentials file path.
+    pub fn credentials_file_path(&self) -> Option<&Path> {
+        self.credentials_file_path.as_ref().map(|p| p.as_ref())
+    }
+
+    /// Get a reference to the AWS config file path
+    pub fn config_file_path(&self) -> Option<&Path> {
+        self.config_file_path.as_ref().map(|p| p.as_ref())
     }
 
     /// Get a reference to the profile name.
@@ -100,11 +116,11 @@ impl ProfileProvider {
     }
 
     /// Set the credentials file path.
-    pub fn set_file_path<F>(&mut self, file_path: F)
+    pub fn set_file_path<F>(&mut self, file_path: F) // FIXME
     where
         F: Into<PathBuf>,
     {
-        self.file_path = file_path.into();
+        self.credentials_file_path = Some(file_path.into());
     }
 
     /// Set the profile name.
@@ -113,6 +129,63 @@ impl ProfileProvider {
         P: Into<String>,
     {
         self.profile = profile.into();
+    }
+
+    /// Create AWS from Credentials
+    fn parse_config_files(&self) -> Result<Config, CredentialsError> {
+        // FIXME: Should this fail if neither a credentials nor a config file is defined.
+
+        let mut config = Config::new();
+
+        let cred_result = self.credentials_file_path().map(|p| {
+            config.parse_credentials(p)
+        }).unwrap_or(Ok(()));
+
+        let config_result = self.config_file_path().map(|p| {
+            config.parse_config(p)
+        }).unwrap_or(Ok(()));
+
+        match (cred_result, config_result) {
+            (Ok(_), Ok(_)) => Ok(()),
+            (Err(e), Ok(_)) => {
+                info!("Ignoring failure to parse credentials file {:?}: {}", self.credentials_file_path(), e);
+                Ok(())
+            },
+            (Ok(_), Err(e)) => {
+                info!("Ignoring failure to parse config file {:?}: {}", self.config_file_path(), e);
+                Ok(())
+            },
+            (Err(e_creds), Err(e_config)) => {
+                Err(CredentialsError::new(
+                    format!("Neither credentials nor config file could be read, {:?}: {}, {:?}: {}",
+                            self.credentials_file_path(),
+                            e_creds,
+                            self.config_file_path(),
+                            e_config,
+                    )
+                ))
+            }
+        }.map(|()| config)
+    }
+
+    fn credentials_from_config(&self, mut properties: HashMap<String, String>) -> Result<AwsCredentials, CredentialsError> {
+        let aws_access_key_id = properties.remove("aws_access_key_id");
+        let aws_secret_access_key = properties.remove("aws_secret_access_key");
+        let aws_session_token = properties.remove("aws_secret_access_key").or(properties.remove("aws_security_token"));
+
+        match (aws_access_key_id, aws_secret_access_key) {
+            (Some(access_key), Some(secret_key)) => {
+                Ok(AwsCredentials::new(
+                    access_key,
+                    secret_key,
+                    aws_session_token,
+                    None
+                ))
+            }
+            (Some(_), None) => Err(CredentialsError::new(format!("missing secret key for profile {:?}", self.profile()))),
+            (None, Some(_)) => Err(CredentialsError::new(format!("missing access key for profile {:?}", self.profile()))),
+            (None, None) => Err(CredentialsError::new(format!("missing access and secret key for profile {:?}", self.profile()))),
+        }
     }
 }
 
@@ -134,131 +207,267 @@ impl ProvideAwsCredentials for ProfileProvider {
     type Future = ProfileProviderFuture;
 
     fn credentials(&self) -> Self::Future {
-        let inner = result(parse_credentials_file(self.file_path()).and_then(|mut profiles| {
-            profiles.remove(self.profile()).ok_or_else(|| {
-                CredentialsError::new("profile not found")
+        let inner = self.parse_config_files().and_then(|mut config| {
+            config.remove_profile(self.profile()).map(|properties| {
+                self.credentials_from_config(properties)
+            }).unwrap_or_else(|| {
+                Err(CredentialsError::new(format!("profile {:?} not found", self.profile())))
             })
-        }));
+        });
 
-        ProfileProviderFuture { inner: inner }
+        ProfileProviderFuture { inner: result(inner) }
     }
 }
 
-/// Parses a Credentials file into a Map of <`ProfileName`, `AwsCredentials`>
-fn parse_credentials_file(
-    file_path: &Path,
-) -> Result<HashMap<String, AwsCredentials>, CredentialsError> {
-    match fs::metadata(file_path) {
-        Err(_) => {
-            return Err(CredentialsError::new(format!(
-                "Couldn't stat credentials file: [ {:?} ]. Non existant, or no permission.",
-                file_path
-            )))
+struct Config {
+    profiles: HashMap<String, HashMap<String, String>>,
+}
+
+impl Config {
+    fn new() -> Self {
+        Config {
+            profiles: HashMap::new(),
         }
-        Ok(metadata) => {
-            if !metadata.is_file() {
-                return Err(CredentialsError::new(format!(
-                    "Credentials file: [ {:?} ] is not a file.",
-                    file_path
-                )));
-            }
-        }
-    };
+    }
 
-    let file = try!(File::open(file_path));
+    fn parse_credentials<P>(&mut self, path: P) -> Result<(), CredentialsError>
+    where
+        P: AsRef<Path>,
+    {
+        self.parse_internal(path, &extract_profile)
+    }
 
-    let profile_regex = Regex::new(r"^\[([^\]]+)\]$").expect("Failed to compile regex");
-    let mut profiles: HashMap<String, AwsCredentials> = HashMap::new();
-    let mut access_key: Option<String> = None;
-    let mut secret_key: Option<String> = None;
-    let mut token: Option<String> = None;
-    let mut profile_name: Option<String> = None;
+    fn parse_config<P>(&mut self, path: P) -> Result<(), CredentialsError>
+    where
+        P: AsRef<Path>,
+    {
+        self.parse_internal(path, &extract_profile_with_profile_prefix)
+    }
 
-    let file_lines = BufReader::new(&file);
-    for (line_no, line) in file_lines.lines().enumerate() {
-        let unwrapped_line: String = line.expect(&format!(
-            "Failed to read credentials file, line: {}",
-            line_no
-        ));
+    fn parse_internal<P, PE>(&mut self, path: P, profile_extractor: PE) -> Result<(), CredentialsError>
+    where
+        P: AsRef<Path>,
+        PE: Fn(&str) -> Option<Result<&str, ()>>,
+    {
+        let mut current_profile = None;
+        let mut invalid_profile = true;
+        let mut current_key: Option<String> = None;
+        let mut current_value: Option<String> = None;
 
-        // skip empty lines
-        if unwrapped_line.is_empty() {
-            continue;
-        }
+        let file = File::open(path.as_ref())?;
+        let file = BufReader::new(file);
 
-        // skip comments
-        if unwrapped_line.starts_with('#') {
-            continue;
-        }
+        for (no, line) in file.lines().enumerate() {
+            let line = line?;
 
-        // handle the opening of named profile blocks
-        if profile_regex.is_match(&unwrapped_line) {
-            if profile_name.is_some() && access_key.is_some() && secret_key.is_some() {
-                let creds = AwsCredentials::new(
-                    access_key.unwrap(),
-                    secret_key.unwrap(),
-                    token,
-                    None,
-                );
-                profiles.insert(profile_name.unwrap(), creds);
-            }
+            if is_comment_or_empty(&line) {
+                // skip
+            } else if let Some(profile) = profile_extractor(&line) {
+                // save property from last profile
+                self.add_property_if_any(&current_profile, current_key.take(), current_value.take());
 
-            access_key = None;
-            secret_key = None;
-            token = None;
-
-            let caps = profile_regex.captures(&unwrapped_line).unwrap();
-            profile_name = Some(caps.get(1).unwrap().as_str().to_string());
-            continue;
-        }
-
-        // otherwise look for key=value pairs we care about
-        let lower_case_line = unwrapped_line.to_ascii_lowercase().to_string();
-
-        if lower_case_line.contains("aws_access_key_id") && access_key.is_none() {
-            let v: Vec<&str> = unwrapped_line.split('=').collect();
-            if !v.is_empty() {
-                access_key = Some(v[1].trim_matches(' ').to_string());
-            }
-        } else if lower_case_line.contains("aws_secret_access_key") && secret_key.is_none() {
-            let v: Vec<&str> = unwrapped_line.split('=').collect();
-            if !v.is_empty() {
-                secret_key = Some(v[1].trim_matches(' ').to_string());
-            }
-        } else if lower_case_line.contains("aws_session_token") && token.is_none() {
-            let v: Vec<&str> = unwrapped_line.split('=').collect();
-            if !v.is_empty() {
-                token = Some(v[1].trim_matches(' ').to_string());
-            }
-        } else if lower_case_line.contains("aws_security_token") {
-            if token.is_none() {
-                let v: Vec<&str> = unwrapped_line.split('=').collect();
-                if !v.is_empty() {
-                    token = Some(v[1].trim_matches(' ').to_string());
+                match profile {
+                    Ok(profile) => {
+                        curr    ent_profile = Some(profile.to_owned());
+                        invalid_profile = false;
+                    },
+                    Err(()) => {
+                        warn!("Ignoring profile with invalid declaration: {:?} at {:?}:{}",
+                              line, path.as_ref(), no);
+                        current_profile = None;
+                        invalid_profile = true
+                    },
                 }
+            } else if invalid_profile {
+                // waiting for valid profile section
+            } else if let Some(continuation) = extract_continuation(&line) {
+                if let Some(current_value) = current_value.as_mut() {
+                    current_value.push_str(continuation);
+                } else {
+                    warn!("Encountered continuation line without a preceding key/value pair \
+                    or a missing profile declaration: {:?} at {:?}:{}", line, path.as_ref(), no);
+                }
+            } else if let Some((key, value)) = extract_property(&line) {
+                // save previous key/value pair
+                self.add_property_if_any(&current_profile, current_key.take(), current_value.take());
+
+                current_key = Some(key.to_owned());
+                current_value = Some(value.to_owned());
+            } else {
+                warn!("Encountered line that is not empty, comment only, a key/value pair or a \
+                continuation line: {:?} at {:?}:{}", line, path.as_ref(), no);
+            }
+        }
+
+        // save final key/value pair
+        self.add_property_if_any(&current_profile, current_key.take(), current_value.take());
+
+        Ok(())
+    }
+
+    fn add_property_if_any(&mut self, profile: &Option<String>, key: Option<String>, value: Option<String>) {
+        if let Some(ref profile) = *profile {
+            if let (Some(key), Some(value)) = (key, value) {
+                self.profiles.entry(profile.to_string())
+                    .and_modify(|entry| {
+                        entry.entry(key.to_string())
+                            .or_insert_with(|| value.to_string());
+                    })
+                    .or_insert_with(|| {
+                        let mut props = HashMap::new();
+                        props.insert(key.to_string(), value.to_string());
+                        props
+                    });
+            }
+        }
+    }
+
+    fn remove_profile(&mut self, profile: &str) -> Option<HashMap<String, String>> {
+        self.profiles.remove(profile)
+    }
+}
+
+fn is_comment_or_empty(line: &str) -> bool {
+    line.starts_with('#') || line.starts_with(';') || !line.contains(|c| c != ' ' && c != '\t')
+}
+
+#[test]
+fn test_is_comment_or_empty() {
+    assert!(is_comment_or_empty(""));
+    assert!(is_comment_or_empty("\t \t"));
+    assert!(is_comment_or_empty("; some comment"));
+    assert!(is_comment_or_empty("# some comment"));
+    assert!(!is_comment_or_empty(" ; continuation line"));
+    assert!(!is_comment_or_empty(" #continuation line"));
+}
+
+
+fn extract_profile(line: &str) -> Option<Result<&str, ()>> {
+    if !line.starts_with('[') {
+        return None
+    }
+    let name = line.split(|c| c == '#' || c == ';').next().unwrap(); // strip comment
+    let name = name.trim_right();
+    if name.ends_with(']') {
+        let name = name[1..name.len()-1].trim();
+        if IS_VALID_IDENTIFIER.is_match(name) {
+            Some(Ok(name))
+        } else {
+            Some(Err(()))
+        }
+    } else {
+        Some(Err(()))
+    }
+}
+
+#[test]
+fn test_extract_profile() {
+    assert_eq!(extract_profile("[default]"), Some(Ok("default")));
+    assert_eq!(extract_profile("[abc]"), Some(Ok("abc")));
+    assert_eq!(extract_profile("[ abc]"), Some(Ok("abc")));
+    assert_eq!(extract_profile("[\tabc\t]"), Some(Ok("abc")));
+    assert_eq!(extract_profile("[abc]#comment"), Some(Ok("abc")));
+    assert_eq!(extract_profile("[abc]\t #comment"), Some(Ok("abc")));
+    assert_eq!(extract_profile("[abc] #comment"), Some(Ok("abc")));
+    assert_eq!(extract_profile(" [abc]"), None); // continuation line
+    assert_eq!(extract_profile("[profile abc]"), Some(Err(())));
+    assert_eq!(extract_profile("[!invalid!]"), Some(Err(())));
+    assert_eq!(extract_profile("[unclosed"), Some(Err(())));
+}
+
+fn extract_profile_with_profile_prefix(line: &str) -> Option<Result<&str, ()>> {
+    if !line.starts_with('[') {
+        return None
+    }
+    let name = line.split(|c| c == '#' || c == ';').next().unwrap(); // strip comment
+    let name = name.trim_right();
+    if name.ends_with(']') {
+        let name = name[1..name.len()-1].trim();
+        if name == "default" {
+            Some(Ok("default"))
+        } else if name.starts_with("profile ") || name.starts_with("profile\t") {
+            let name = &name[8..];
+            if IS_VALID_IDENTIFIER.is_match(name) {
+                Some(Ok(name))
+            } else {
+                Some(Err(()))
             }
         } else {
-            // Ignore unrecognized fields
-            continue;
+            Some(Err(()))
         }
-
+    } else {
+        Some(Err(()))
     }
+}
 
-    if profile_name.is_some() && access_key.is_some() && secret_key.is_some() {
-        let creds = AwsCredentials::new(
-            access_key.unwrap(),
-            secret_key.unwrap(),
-            token,
-            None,
-        );
-        profiles.insert(profile_name.unwrap(), creds);
+#[test]
+fn test_extract_profile_with_profile_prefix() {
+    assert_eq!(extract_profile_with_profile_prefix("[default]"), Some(Ok("default")));
+    assert_eq!(extract_profile_with_profile_prefix("[profile abc]"), Some(Ok("abc")));
+    assert_eq!(extract_profile_with_profile_prefix("[ profile abc]"), Some(Ok("abc")));
+    assert_eq!(extract_profile_with_profile_prefix("[ profile abc ]"), Some(Ok("abc")));
+    assert_eq!(extract_profile_with_profile_prefix("[profile abc]#comment"), Some(Ok("abc")));
+    assert_eq!(extract_profile_with_profile_prefix("[profile abc]\t #comment"), Some(Ok("abc")));
+    assert_eq!(extract_profile_with_profile_prefix("[profile abc] #comment"), Some(Ok("abc")));
+    assert_eq!(extract_profile_with_profile_prefix("abc]"), None);
+    assert_eq!(extract_profile_with_profile_prefix(" [abc]"), None); // continuation line
+    assert_eq!(extract_profile_with_profile_prefix("[profile !invalid!]"), Some(Err(())));
+    assert_eq!(extract_profile_with_profile_prefix("[abc]"), Some(Err(())));
+    assert_eq!(extract_profile_with_profile_prefix("[unclosed"), Some(Err(())));
+}
+
+fn extract_property(line: &str) -> Option<(&str, &str)> {
+    let mut splitter = line.splitn(2, '=');
+    let key = splitter.next().unwrap().trim();
+    if !IS_VALID_IDENTIFIER.is_match(key) {
+        return None;
     }
+    let value = splitter.next()?;
+    let value = remove_comment(value);
+    Some((key, value.trim()))
+}
 
-    if profiles.is_empty() {
-        return Err(CredentialsError::new("No credentials found."));
+fn remove_comment<'a>(value: &'a str) -> &'a str {
+    value.split(" #").next().unwrap()
+        .split(" ;").next().unwrap()
+        .split("\t#").next().unwrap()
+        .split("\t;").next().unwrap()
+}
+
+#[test]
+fn test_extract_property() {
+    assert_eq!(extract_property("key=val"), Some(("key", "val")));
+    assert_eq!(extract_property("key =val"), Some(("key", "val")));
+    assert_eq!(extract_property("key = val "), Some(("key", "val")));
+    assert_eq!(extract_property("key=val#not a comment"), Some(("key", "val#not a comment")));
+    assert_eq!(extract_property("key=val #a comment"), Some(("key", "val")));
+    assert_eq!(
+        extract_property(
+            "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_=all valid chars"
+        ),
+        Some((
+            "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_",
+            "all valid chars"
+        ))
+    );
+    assert_eq!(extract_property("ïnṽåłǐḑ"), None);
+    assert_eq!(extract_property("invalid"), None);
+}
+
+fn extract_continuation(line: &str) -> Option<&str> {
+    if line.starts_with(' ') || line.starts_with('\t') {
+        Some(line.trim())
+    } else {
+        None
     }
+}
 
-    Ok(profiles)
+#[test]
+fn test_extract_continuation() {
+    assert_eq!(extract_continuation(" αβχ"), Some("αβχ"));
+    assert_eq!(extract_continuation(" continuation line"), Some("continuation line"));
+    assert_eq!(extract_continuation("\tcontinuation line"), Some("continuation line"));
+    assert_eq!(extract_continuation("invalid"), None);
 }
 
 #[cfg(test)]

@@ -11,6 +11,10 @@ extern crate chrono;
 extern crate futures;
 extern crate hyper;
 extern crate hyper_tls;
+#[macro_use]
+extern crate lazy_static;
+#[macro_use]
+extern crate log;
 extern crate regex;
 extern crate serde_json;
 extern crate tokio_core;
@@ -571,10 +575,6 @@ fn parse_credentials_from_aws_service(response: &str) -> Result<AwsCredentials, 
         expiration,
     ))
 }
-
-#[cfg(test)]
-#[macro_use]
-extern crate lazy_static;
 
 #[cfg(test)]
 #[macro_use]
