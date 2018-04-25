@@ -1,8 +1,5 @@
 //! The Credentials Provider for Credentials stored in a profile inside of a Credentials file.
 
-#![warn(unused_variables)]     // FIXME: remove
-#![warn(warnings)]
-
 use std::collections::HashMap;
 use std::convert::AsRef;
 use std::env::{home_dir};
@@ -17,6 +14,7 @@ use regex::Regex;
 use {AwsCredentials, CredentialsError, ProvideAwsCredentials, non_empty_env_var};
 
 const AWS_PROFILE: &str = "AWS_PROFILE";
+const AWS_SHARED_CONFIG_FILE: &str = "AWS_SHARED_CONFIG_FILE";  // FIXME: name just guessed, what do other implementations use
 const AWS_SHARED_CREDENTIALS_FILE: &str = "AWS_SHARED_CREDENTIALS_FILE";
 const DEFAULT: &str = "default";
 
@@ -38,66 +36,26 @@ pub struct ProfileProvider {
 impl ProfileProvider {
 
     /// Create a new `ProfileProvider` for the default credentials file path and profile name.
+    ///
+    /// Reads the credentials from `~/.aws/credentials` and `~/.aws/config`. Credentials in the
+    /// former file take precedence.
     pub fn new() -> Result<ProfileProvider, CredentialsError> {
-        let profile_location = ProfileProvider::default_profile_location()?;
-        Ok(ProfileProvider::with_default_configuration(profile_location))
+        let credentials_location = ProfileProvider::default_credentials_location()?;
+        let config_location = ProfileProvider::default_config_location()?;
+        Ok(ProfileProvider {
+            config_file_path: Some(config_location),
+            credentials_file_path: Some(credentials_location),
+            profile: ProfileProvider::default_profile_name(),
+        })
     }
 
-    /// Create a new `ProfileProvider` for the credentials file at the given path, using
-    /// the given profile.
-    pub fn with_configuration<F, P>(file_path: F, profile: P) -> ProfileProvider
+    ///
+    pub fn set_credentials_file_path<P>(&mut self, path: P) -> &mut Self
     where
-        F: Into<PathBuf>,
-        P: Into<String>,
+        P: Into<PathBuf>,
     {
-        let path = file_path.into();
-        ProfileProvider {
-            config_file_path: Some(path.clone()),  // FIXME: correct path
-            credentials_file_path: Some(path),     // FIXME
-            profile: profile.into(),
-        }
-    }
-
-    /// Create a new `ProfileProvider` for the credentials file at the given path, using
-    /// the profile name from environment variable ```AWS_PROFILE``` or fall-back to ```"default"```
-    /// if ```AWS_PROFILE``` is not set.
-    pub fn with_default_configuration<F>(file_path: F) -> ProfileProvider
-    where
-        F: Into<PathBuf>
-    {
-        ProfileProvider::with_configuration(file_path, ProfileProvider::default_profile_name())
-    }
-
-    /// Default credentials file location:
-    /// 1. if set and not empty, use value from environment variable ```AWS_SHARED_CREDENTIALS_FILE```
-    /// 2. otherwise return `~/.aws/credentials` (Linux/Mac) resp. `%USERPROFILE%\.aws\credentials` (Windows)
-    fn default_profile_location() -> Result<PathBuf, CredentialsError> {
-        let env = non_empty_env_var(AWS_SHARED_CREDENTIALS_FILE);
-        match env {
-            Some(path) => Ok(PathBuf::from(path)),
-            None => ProfileProvider::hardcoded_profile_location(),
-        }
-    }
-
-    fn hardcoded_profile_location() -> Result<PathBuf, CredentialsError> {
-        match home_dir() {
-            Some(mut home_path) => {
-                home_path.push(".aws");
-                home_path.push("credentials");
-                Ok(home_path)
-            }
-            None => Err(CredentialsError::new(
-                "The environment variable HOME must be set.",
-            )),
-        }
-    }
-
-    /// Get the default profile name:
-    /// 1. if set and not empty, use value from environment variable ```AWS_PROFILE```
-    /// 2. otherwise return ```"default"```
-    /// see https://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/credentials.html.
-    fn default_profile_name() -> String {
-        non_empty_env_var(AWS_PROFILE).unwrap_or_else(|| DEFAULT.to_owned())
+        self.credentials_file_path = Some(path.into());
+        self
     }
 
     /// Get a reference to the AWS credentials file path.
@@ -117,18 +75,58 @@ impl ProfileProvider {
 
     /// Set the credentials file path.
     pub fn set_file_path<F>(&mut self, file_path: F) // FIXME
-    where
-        F: Into<PathBuf>,
+        where
+            F: Into<PathBuf>,
     {
         self.credentials_file_path = Some(file_path.into());
     }
 
     /// Set the profile name.
     pub fn set_profile<P>(&mut self, profile: P)
-    where
-        P: Into<String>,
+        where
+            P: Into<String>,
     {
         self.profile = profile.into();
+    }
+
+    fn default_config_location() -> Result<PathBuf, CredentialsError> {
+        Self::default_location_of(AWS_SHARED_CONFIG_FILE, "config")
+    }
+
+    fn default_credentials_location() -> Result<PathBuf, CredentialsError> {
+        Self::default_location_of(AWS_SHARED_CREDENTIALS_FILE, "credentials")
+    }
+
+    /// Default credentials file location:
+    /// 1. if set and not empty, use value from environment variable ```AWS_SHARED_CREDENTIALS_FILE```
+    /// 2. otherwise return `~/.aws/credentials` (Linux/Mac) resp. `%USERPROFILE%\.aws\credentials` (Windows)
+    fn default_location_of(env: &str, name: &str) -> Result<PathBuf, CredentialsError> {
+        let env = non_empty_env_var(env);
+        match env {
+            Some(path) => Ok(PathBuf::from(path)),
+            None => ProfileProvider::hardcoded_location_of(name),
+        }
+    }
+
+    fn hardcoded_location_of(name: &str) -> Result<PathBuf, CredentialsError> {
+        match home_dir() {
+            Some(mut home_path) => {
+                home_path.push(".aws");
+                home_path.push(name);
+                Ok(home_path)
+            }
+            None => Err(CredentialsError::new(
+                "The environment variable HOME must be set.",
+            )),
+        }
+    }
+
+    /// Get the default profile name:
+    /// 1. if set and not empty, use value from environment variable ```AWS_PROFILE```
+    /// 2. otherwise return ```"default"```
+    /// see https://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/credentials.html.
+    fn default_profile_name() -> String {
+        non_empty_env_var(AWS_PROFILE).unwrap_or_else(|| DEFAULT.to_owned())
     }
 
     /// Create AWS from Credentials
@@ -171,7 +169,7 @@ impl ProfileProvider {
     fn credentials_from_config(&self, mut properties: HashMap<String, String>) -> Result<AwsCredentials, CredentialsError> {
         let aws_access_key_id = properties.remove("aws_access_key_id");
         let aws_secret_access_key = properties.remove("aws_secret_access_key");
-        let aws_session_token = properties.remove("aws_secret_access_key").or(properties.remove("aws_security_token"));
+        let aws_session_token = properties.remove("aws_secret_access_key").or_else(||properties.remove("aws_security_token"));
 
         match (aws_access_key_id, aws_secret_access_key) {
             (Some(access_key), Some(secret_key)) => {
@@ -268,7 +266,7 @@ impl Config {
 
                 match profile {
                     Ok(profile) => {
-                        curr    ent_profile = Some(profile.to_owned());
+                        current_profile = Some(profile.to_owned());
                         invalid_profile = false;
                     },
                     Err(()) => {
