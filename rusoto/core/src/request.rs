@@ -9,6 +9,7 @@ use std::io::Error as IoError;
 use std::error::Error;
 use std::fmt;
 use std::collections::hash_map::{self, HashMap};
+use std::str;
 use std::time::Duration;
 use std::mem;
 
@@ -275,18 +276,25 @@ impl DispatchSignedRequest for HttpClient {
         }
 
         if log_enabled!(Debug) {
-            let payload = match request.payload {
+            let (payload, suffix) = match request.payload {
                 Some(ref payload_bytes) => {
-                    String::from_utf8(payload_bytes.to_owned())
-                        .unwrap_or_else(|_| String::from("<non-UTF-8 data>"))
+                    str::from_utf8(&payload_bytes).map(|payload| {
+                        // truncate at character 1024
+                        if let Some((boundry, _)) = payload.char_indices().nth(1024) {
+                            (payload.get(0..boundry).unwrap(), " ... <truncated>")
+                        } else {
+                            (payload, "")
+                        }
+                    }).unwrap_or(("<non-UTF-8 data>", ""))
                 }
-                _ => "".to_owned(),
+                _ => ("", ""),
             };
 
-            debug!("Full request: \n method: {}\n final_uri: {}\n payload: {}\nHeaders:\n",
+            debug!("Full request: \n method: {}\n final_uri: {}\n payload: {}{}\nHeaders:\n",
                    hyper_method,
                    final_uri,
-                   payload);
+                   payload,
+                   suffix);
             for h in hyper_headers.iter() {
                 debug!("{}:{}", h.name(), h.value_string());
             }
