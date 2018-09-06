@@ -132,10 +132,7 @@ fn test_all_the_things() {
     list_items_in_bucket_paged_v1(&client, &test_bucket);
 
     // list items with paging using list object API v2
-    if cfg!(not(feature = "disable_ceph_unsupported")) {
-        // Ceph support: this test depends on the list object v2 API which is not implemented by Ceph
-        list_items_in_bucket_paged_v2(&client, &test_bucket);
-    }
+    list_items_in_bucket_paged_v2(&client, &test_bucket);
 
     test_delete_object(&client, &test_bucket, &metadata_filename);
     test_delete_object(&client, &test_bucket, &binary_filename);
